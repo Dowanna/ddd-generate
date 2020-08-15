@@ -1,8 +1,8 @@
 import {Command, flags} from '@oclif/command'
 import * as fs from 'fs'
 import * as path from 'path'
-import {createEntityClassString} from './class-strings'
-import {capitalizeFirstChar, kebabCase} from './util/string'
+import {createEntityClassString, createRepositoryInterfaceString} from './class-strings'
+import {upperCaseFirstChar, kebabCase, lowerCaseFirstChar} from './util/string'
 
 class Dddgen extends Command {
   static description = 'describe the command here'
@@ -22,16 +22,41 @@ class Dddgen extends Command {
   async run() {
     const {args, flags} = this.parse(Dddgen)
     const name = flags.name || args.entity || 'blank'
-    const entityName = capitalizeFirstChar(name)
+    this.createEntity(name)
+    this.createRepository(name)
+  }
 
-    this.createEntity(entityName)
+  private createRepository(domainNameOriginal: string) {
+    const domainNameClass = upperCaseFirstChar(domainNameOriginal)
+    const domainNameVariable = lowerCaseFirstChar(domainNameOriginal)
+    const domainNameKebab = kebabCase(domainNameOriginal)
+    const relativePathInterfaceToEntity = `../entity/${domainNameKebab}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
+    const filePath = this.createRepositoryDirectory(domainNameKebab)
+
+    const repositoryInterface = createRepositoryInterfaceString({domainNameClass, domainNameVariable, relativePathInterfaceToEntity})
+    fs.writeFileSync(path.join(filePath, `${domainNameKebab}-repository.ts`), repositoryInterface)
   }
 
   private createEntity(domainNameOriginal: string) {
+    const domainNameClass = upperCaseFirstChar(domainNameOriginal)
     const domainNameKebab = kebabCase(domainNameOriginal)
+
     const filePath = this.createEntityDirectory(domainNameKebab)
-    const entityClassString = createEntityClassString(domainNameOriginal)
+    const entityClassString = createEntityClassString(domainNameClass)
     fs.writeFileSync(path.join(filePath, `${domainNameKebab}.ts`), entityClassString)
+  }
+
+  private createRepositoryDirectory(domainName: string) {
+    const srcDir = 'src'
+    const domain = 'domain'
+    const repository = 'repository'
+
+    let filePath = fs.existsSync(srcDir) ? srcDir : ''
+    filePath = path.join(filePath, `${domain}/${domainName}/${repository}`)
+
+    this.createDirectoryIfNotExists(filePath)
+
+    return filePath
   }
 
   private createEntityDirectory(domainName: string) {
