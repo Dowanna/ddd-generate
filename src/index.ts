@@ -2,7 +2,8 @@ import {Command, flags} from '@oclif/command'
 import * as fs from 'fs'
 import * as path from 'path'
 import {createEntityClassString, createRepositoryInterfaceString} from './class-strings'
-import {upperCaseFirstChar, kebabCase, lowerCaseFirstChar} from './util/string'
+import {getDomainNamePatterns} from './util/path'
+import {srcDir, repository, entity, domain} from './constants/path'
 
 class Dddgen extends Command {
   static description = 'describe the command here'
@@ -27,9 +28,7 @@ class Dddgen extends Command {
   }
 
   private createRepository(domainNameOriginal: string) {
-    const domainNameClass = upperCaseFirstChar(domainNameOriginal)
-    const domainNameVariable = lowerCaseFirstChar(domainNameOriginal)
-    const domainNameKebab = kebabCase(domainNameOriginal)
+    const {domainNameClass, domainNameVariable, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
     const relativePathInterfaceToEntity = `../entity/${domainNameKebab}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
     const filePath = this.createRepositoryDirectory(domainNameKebab)
 
@@ -38,8 +37,7 @@ class Dddgen extends Command {
   }
 
   private createEntity(domainNameOriginal: string) {
-    const domainNameClass = upperCaseFirstChar(domainNameOriginal)
-    const domainNameKebab = kebabCase(domainNameOriginal)
+    const {domainNameClass, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
 
     const filePath = this.createEntityDirectory(domainNameKebab)
     const entityClassString = createEntityClassString(domainNameClass)
@@ -47,10 +45,6 @@ class Dddgen extends Command {
   }
 
   private createRepositoryDirectory(domainName: string) {
-    const srcDir = 'src'
-    const domain = 'domain'
-    const repository = 'repository'
-
     let filePath = fs.existsSync(srcDir) ? srcDir : ''
     filePath = path.join(filePath, `${domain}/${domainName}/${repository}`)
 
@@ -60,10 +54,6 @@ class Dddgen extends Command {
   }
 
   private createEntityDirectory(domainName: string) {
-    const srcDir = 'src'
-    const domain = 'domain'
-    const entity = 'entity'
-
     let filePath = fs.existsSync(srcDir) ? srcDir : ''
     filePath = path.join(filePath, `${domain}/${domainName}/${entity}`)
 
