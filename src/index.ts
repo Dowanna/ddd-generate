@@ -17,49 +17,46 @@ class Dddgen extends Command {
     force: flags.boolean({char: 'f'}),
   }
 
-  static args = [{name: 'file'}]
+  static args = [{name: 'entity'}]
 
   async run() {
-    const {flags} = this.parse(Dddgen)
-    const name = flags.name ?? 'world'
-    if (!name) {
-      this.error('必ずエンティティの名前を入力してください')
-    }
+    const {args, flags} = this.parse(Dddgen)
+    const name = flags.name || args.entity || 'blank'
     const entityName = capitalizeFirstChar(name)
 
-    this.log(`create file with name: ${entityName}`)
-
-    const domainFilePath = this.createDomainClassPath(entityName)
-    const entityClassString = createEntityClassString(entityName)
-
-    fs.writeFileSync(domainFilePath, entityClassString)
+    this.createEntity(entityName)
   }
 
-  private createDomainClassPath(domainNameOriginal: string) {
-    const domainName = kebabCase(domainNameOriginal)
+  private createEntity(domainNameOriginal: string) {
+    const domainNameKebab = kebabCase(domainNameOriginal)
+    const filePath = this.createEntityDirectory(domainNameKebab)
+    const entityClassString = createEntityClassString(domainNameOriginal)
+    fs.writeFileSync(path.join(filePath, `${domainNameKebab}.ts`), entityClassString)
+  }
+
+  private createEntityDirectory(domainName: string) {
     const srcDir = 'src'
-    let domainFilePath = '.'
     const domain = 'domain'
     const entity = 'entity'
 
-    if (fs.existsSync(srcDir)) {
-      domainFilePath = path.join(domainFilePath, srcDir)
-    }
+    let filePath = fs.existsSync(srcDir) ? srcDir : ''
+    filePath = path.join(filePath, `${domain}/${domainName}/${entity}`)
 
-    // fixme: 再帰関数でもうちょい綺麗に書く
-    if (!fs.existsSync(path.join(domainFilePath, domain))) {
-      fs.mkdirSync(path.join(domainFilePath, domain))
-    }
-    if (!fs.existsSync(path.join(domainFilePath, domain, domainName))) {
-      fs.mkdirSync(path.join(domainFilePath, domain, domainName))
-    }
-    if (!fs.existsSync(path.join(domainFilePath, domain, domainName, entity))) {
-      fs.mkdirSync(path.join(domainFilePath, domain, domainName, entity))
-    }
+    this.createDirectoryIfNotExists(filePath)
 
-    domainFilePath = path.join(domainFilePath, domain, domainName, entity, `./${domainName}.ts`)
-    this.log(domainFilePath)
-    return domainFilePath
+    return filePath
+  }
+
+  private createDirectoryIfNotExists(fullPath: string) {
+    const fullPathArray = fullPath.split('/')
+    let currentPath = ''
+
+    fullPathArray.forEach((nextPath, i) => {
+      currentPath = path.join(currentPath, nextPath)
+      if (!fs.existsSync(currentPath)) {
+        fs.mkdirSync(currentPath)
+      }
+    })
   }
 }
 
