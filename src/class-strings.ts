@@ -5,6 +5,8 @@ const index = 'index'
 const Index = 'Index'
 const find = 'find'
 const Find = 'Find'
+const update = 'update'
+const Update = 'Update'
 
 export const createEntityClassString = (entityName: string) => {
   return `
@@ -91,6 +93,35 @@ export const createFindUsecaseString = (params: {domainNameClass: string; domain
       if (!${domainNameVariable}) return undefined
 
       return new ${domainNameClass}${dto}(${domainNameVariable})
+    }
+  }
+  `
+}
+
+export const createUpdateUsecaseString = (params: {domainNameClass: string; domainNameVariable: string; relativePathAppToRepo: string; relativePathAppToEntity: string; relativePathAppToDTO: string}): string => {
+  const {domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO} = params
+
+  return `
+  import { ${domainNameClass} } from '${relativePathAppToEntity}'
+  import { ${domainNameClass}${repository} } from '${relativePathAppToRepo}'
+  import { ${domainNameClass}${dto} } from '${relativePathAppToDTO}'
+
+  export class ${Update}${domainNameClass}${usecase} {
+    private readonly ${domainNameVariable}Repo: ${domainNameClass}${repository}
+
+    public constructor(${domainNameVariable}Repo: ${domainNameClass}${repository}) {
+      this.${domainNameVariable}Repo = ${domainNameVariable}Repo
+    }
+
+    public async do(id: string) {
+      const ${domainNameVariable}: ${domainNameClass} = new ${domainNameClass}({ id })
+      try {
+        const updated${domainNameClass} = await this.${domainNameVariable}Repo.${update}(${domainNameVariable})
+        return new ${domainNameClass}${dto}(updated${domainNameClass})
+      } catch (error) {
+        // todo: error handling
+        console.error(error)
+      }
     }
   }
   `

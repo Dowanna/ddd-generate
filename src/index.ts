@@ -1,7 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import * as fs from 'fs'
 import * as path from 'path'
-import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString, createFindUsecaseString} from './class-strings'
+import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString, createFindUsecaseString, createUpdateUsecaseString} from './class-strings'
 import {getDomainNamePatterns} from './util/path'
 import {srcDir, usecase, repository, entity, domain, dto, app, fileExtention} from './constants/path'
 
@@ -56,13 +56,20 @@ class Dddgen extends Command {
     const relativePathAppToEntity = `../../../${domain}/${domainNameKebab}/${entity}/${domainNameKebab}`// fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
     const relativePathAppToDTO = `../${dto}/${this.dtoFileName(domainNameKebab)}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
 
+    // index
     const indexUsecaseFilePath = this.createUsecaseDirectory(domainNameKebab)
     const indexUsecaseClassString = createIndexUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
     fs.writeFileSync(path.join(indexUsecaseFilePath, `index-${domainNameKebab}-usecase.ts`), indexUsecaseClassString)
 
+    // find
     const findUsecaseFilePath = indexUsecaseFilePath
     const findUsecaseClassString = createFindUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
     fs.writeFileSync(path.join(findUsecaseFilePath, `find-${domainNameKebab}-usecase.ts`), findUsecaseClassString)
+
+    // update
+    const updateUsecaseFilePath = indexUsecaseFilePath
+    const updateUsecaseClassString = createUpdateUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
+    fs.writeFileSync(path.join(updateUsecaseFilePath, `update-${domainNameKebab}-usecase.ts`), updateUsecaseClassString)
   }
 
   private createAppDTO(domainNameOriginal: string) {
