@@ -6,3 +6,4 @@ export const entity = 'entity'
 export const repository = 'repository'
 export const dto = 'dto'
 
+export const fileExtention = '.ts'

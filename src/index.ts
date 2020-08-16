@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString, createFindUsecaseString} from './class-strings'
 import {getDomainNamePatterns} from './util/path'
-import {srcDir, usecase, repository, entity, domain, dto, app} from './constants/path'
+import {srcDir, usecase, repository, entity, domain, dto, app, fileExtention} from './constants/path'
 
 class Dddgen extends Command {
   static description = 'describe the command here'
@@ -28,30 +28,58 @@ class Dddgen extends Command {
     this.createUsecase(name)
   }
 
+  private repositoryFileName = (domainNameKebab: string) => {
+    return `${domainNameKebab}-repository`
+  }
+
+  private dtoFileName = (domainNameKebab: string) => {
+    return `${domainNameKebab}-dto`
+  }
+
+  private entityFileNameWithExtension = (domainNameKebab: string) => {
+    return `${domainNameKebab}${fileExtention}`
+  }
+
+  private dtoFileNameWithExtension = (domainNameKebab: string) => {
+    return `${this.dtoFileName(domainNameKebab)}${fileExtention}`
+  }
+
+  private repositoryFileNameWithExtension = (domainNameKebab: string) => {
+    return `${this.repositoryFileName(domainNameKebab)}${fileExtention}`
+  }
+
   private createUsecase(domainNameOriginal: string) {
+    this.createAppDTO(domainNameOriginal)
+
     const {domainNameClass, domainNameVariable, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
-    const relativePathAppToRepo = `../../../${domain}/${domainNameKebab}/${repository}/${domainNameKebab}-repository` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
-    const relativePathAppToEntity = `../../../${domain}/${domainNameKebab}/${entity}/${domainNameKebab}`
-    const relativePathAppToDTO = `../${dto}/${domainNameKebab}-dto` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
+    const relativePathAppToRepo = `../../../${domain}/${domainNameKebab}/${repository}/${this.repositoryFileName(domainNameKebab)}`// fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
+    const relativePathAppToEntity = `../../../${domain}/${domainNameKebab}/${entity}/${domainNameKebab}`// fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
+    const relativePathAppToDTO = `../${dto}/${this.dtoFileName(domainNameKebab)}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
 
-    const dtoClassString = createDTOClassString({domainNameClass, domainNameVariable, relativePathDTOToEntity: relativePathAppToEntity})
-    const indexUsecaseClassString = createIndexUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
-    const findUsecaseClassString = createFindUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
-    const dtoFilePath = this.createAppDTODirectory(domainNameKebab)
     const indexUsecaseFilePath = this.createUsecaseDirectory(domainNameKebab)
-
-    fs.writeFileSync(path.join(dtoFilePath, `${domainNameKebab}-dto.ts`), dtoClassString)
+    const indexUsecaseClassString = createIndexUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
     fs.writeFileSync(path.join(indexUsecaseFilePath, `index-${domainNameKebab}-usecase.ts`), indexUsecaseClassString)
-    fs.writeFileSync(path.join(indexUsecaseFilePath, `find-${domainNameKebab}-usecase.ts`), findUsecaseClassString)
+
+    const findUsecaseFilePath = indexUsecaseFilePath
+    const findUsecaseClassString = createFindUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
+    fs.writeFileSync(path.join(findUsecaseFilePath, `find-${domainNameKebab}-usecase.ts`), findUsecaseClassString)
+  }
+
+  private createAppDTO(domainNameOriginal: string) {
+    const {domainNameClass, domainNameVariable, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
+    const relativePathAppToEntity = `../../../${domain}/${domainNameKebab}/${entity}/${domainNameKebab}`// fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
+    const dtoFilePath = this.createAppDTODirectory(domainNameKebab)
+    const dtoClassString = createDTOClassString({domainNameClass, domainNameVariable, relativePathDTOToEntity: relativePathAppToEntity})
+    fs.writeFileSync(path.join(dtoFilePath, `${this.dtoFileNameWithExtension(domainNameKebab)}`), dtoClassString)
   }
 
   private createRepository(domainNameOriginal: string) {
     const {domainNameClass, domainNameVariable, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
-    const relativePathInterfaceToEntity = `../entity/${domainNameKebab}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
-    const filePath = this.createRepositoryDirectory(domainNameKebab)
+    const relativePathInterfaceToEntity = `../${entity}/${domainNameKebab}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
 
+    const filePath = this.createRepositoryDirectory(domainNameKebab)
     const repositoryInterface = createRepositoryInterfaceString({domainNameClass, domainNameVariable, relativePathInterfaceToEntity})
-    fs.writeFileSync(path.join(filePath, `${domainNameKebab}-repository.ts`), repositoryInterface)
+    fs.writeFileSync(path.join(filePath, `${this.repositoryFileNameWithExtension(domainNameKebab)}`), repositoryInterface)
   }
 
   private createEntity(domainNameOriginal: string) {
@@ -59,7 +87,7 @@ class Dddgen extends Command {
 
     const filePath = this.createEntityDirectory(domainNameKebab)
     const entityClassString = createEntityClassString(domainNameClass)
-    fs.writeFileSync(path.join(filePath, `${domainNameKebab}.ts`), entityClassString)
+    fs.writeFileSync(path.join(filePath, this.entityFileNameWithExtension(domainNameKebab)), entityClassString)
   }
 
   private createUsecaseDirectory(domainName: string) {
@@ -98,7 +126,7 @@ class Dddgen extends Command {
     const fullPathArray = fullPath.split('/')
     let currentPath = ''
 
-    fullPathArray.forEach((nextPath, i) => {
+    fullPathArray.forEach(nextPath => {
       currentPath = path.join(currentPath, nextPath)
       if (!fs.existsSync(currentPath)) {
         fs.mkdirSync(currentPath)
