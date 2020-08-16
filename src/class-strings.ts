@@ -116,10 +116,13 @@ export const createUpdateUsecaseString = (params: {domainNameClass: string; doma
     }
 
     public async do(id: string) {
-      const ${domainNameVariable}: ${domainNameClass} = new ${domainNameClass}({ id })
       try {
-        const updated${domainNameClass} = await this.${domainNameVariable}Repo.${update}(${domainNameVariable})
-        return new ${domainNameClass}${dto}(updated${domainNameClass})
+        const ${domainNameVariable}: ${domainNameClass} = await this.${domainNameVariable}Repo.${find}(id)
+        if (!${domainNameVariable}) return undefined
+
+        const updated${domainNameClass} = new ${domainNameClass}({...${domainNameVariable}})
+        const persisted${domainNameClass} = await this.${domainNameVariable}Repo.${update}(updated${domainNameClass})
+        return new ${domainNameClass}${dto}(persisted${domainNameClass})
       } catch (error) {
         // todo: error handling
         console.error(error)
@@ -130,7 +133,7 @@ export const createUpdateUsecaseString = (params: {domainNameClass: string; doma
 }
 
 export const createDeleteUsecaseString = (params: {domainNameClass: string; domainNameVariable: string; relativePathAppToRepo: string; relativePathAppToEntity: string; relativePathAppToDTO: string}): string => {
-  const {domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO} = params
+  const {domainNameClass, domainNameVariable, relativePathAppToRepo} = params
   return `
   import { ${domainNameClass}${repository} } from '${relativePathAppToRepo}'
 
