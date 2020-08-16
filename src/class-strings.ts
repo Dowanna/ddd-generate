@@ -7,6 +7,8 @@ const find = 'find'
 const Find = 'Find'
 const update = 'update'
 const Update = 'Update'
+const deleteLowerCase = 'delete'
+const Delete = 'Delete'
 
 export const createEntityClassString = (entityName: string) => {
   return `
@@ -31,8 +33,8 @@ export const createRepositoryInterfaceString = (params: {domainNameClass: string
   export interface ${entityClassName}${repository} {
     ${index}(): Promise<${entityClassName}[]>;
     ${find}(id: string): Promise<${entityClassName}>;
-    delete(id: string): Promise<void>;
-    update(${entityVariableName}: ${entityClassName}): Promise<${entityClassName}>;
+    ${deleteLowerCase}(id: string): Promise<void>;
+    ${update}(${entityVariableName}: ${entityClassName}): Promise<${entityClassName}>;
   }
   `
 }
@@ -118,6 +120,30 @@ export const createUpdateUsecaseString = (params: {domainNameClass: string; doma
       try {
         const updated${domainNameClass} = await this.${domainNameVariable}Repo.${update}(${domainNameVariable})
         return new ${domainNameClass}${dto}(updated${domainNameClass})
+      } catch (error) {
+        // todo: error handling
+        console.error(error)
+      }
+    }
+  }
+  `
+}
+
+export const createDeleteUsecaseString = (params: {domainNameClass: string; domainNameVariable: string; relativePathAppToRepo: string; relativePathAppToEntity: string; relativePathAppToDTO: string}): string => {
+  const {domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO} = params
+  return `
+  import { ${domainNameClass}${repository} } from '${relativePathAppToRepo}'
+
+  export class ${Delete}${domainNameClass}${usecase} {
+    private readonly ${domainNameVariable}Repo: ${domainNameClass}${repository}
+
+    public constructor(${domainNameVariable}Repo: ${domainNameClass}${repository}) {
+      this.${domainNameVariable}Repo = ${domainNameVariable}Repo
+    }
+
+    public async do(id: string) {
+      try {
+        await this.${domainNameVariable}Repo.${deleteLowerCase}(id)
       } catch (error) {
         // todo: error handling
         console.error(error)

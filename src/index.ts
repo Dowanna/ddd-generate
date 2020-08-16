@@ -1,7 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import * as fs from 'fs'
 import * as path from 'path'
-import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString, createFindUsecaseString, createUpdateUsecaseString} from './class-strings'
+import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString, createFindUsecaseString, createUpdateUsecaseString, createDeleteUsecaseString} from './class-strings'
 import {getDomainNamePatterns} from './util/path'
 import {srcDir, usecase, repository, entity, domain, dto, app, fileExtention} from './constants/path'
 
@@ -70,6 +70,11 @@ class Dddgen extends Command {
     const updateUsecaseFilePath = indexUsecaseFilePath
     const updateUsecaseClassString = createUpdateUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
     fs.writeFileSync(path.join(updateUsecaseFilePath, `update-${domainNameKebab}-usecase.ts`), updateUsecaseClassString)
+
+    // delete
+    const deleteUsecaseFilePath = indexUsecaseFilePath
+    const deleteUsecaseClassString = createDeleteUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
+    fs.writeFileSync(path.join(deleteUsecaseFilePath, `delete-${domainNameKebab}-usecase.ts`), deleteUsecaseClassString)
   }
 
   private createAppDTO(domainNameOriginal: string) {
