@@ -22,24 +22,21 @@ class Dddgen extends Command {
     this.createUsecase(name)
   }
 
-  private repositoryFileName = (domainNameKebab: string) => {
-    return `${domainNameKebab}-repository`
+  private createEntity(domainNameOriginal: string) {
+    const {domainNameClass, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
+
+    const filePath = this.createEntityDirectory(domainNameKebab)
+    const entityClassString = createEntityClassString(domainNameClass)
+    fs.writeFileSync(path.join(filePath, this.entityFileNameWithExtension(domainNameKebab)), entityClassString)
   }
 
-  private dtoFileName = (domainNameKebab: string) => {
-    return `${domainNameKebab}-dto`
-  }
+  private createRepository(domainNameOriginal: string) {
+    const {domainNameClass, domainNameVariable, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
+    const relativePathInterfaceToEntity = `../${entity}/${domainNameKebab}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
 
-  private entityFileNameWithExtension = (domainNameKebab: string) => {
-    return `${domainNameKebab}${fileExtention}`
-  }
-
-  private dtoFileNameWithExtension = (domainNameKebab: string) => {
-    return `${this.dtoFileName(domainNameKebab)}${fileExtention}`
-  }
-
-  private repositoryFileNameWithExtension = (domainNameKebab: string) => {
-    return `${this.repositoryFileName(domainNameKebab)}${fileExtention}`
+    const filePath = this.createRepositoryDirectory(domainNameKebab)
+    const repositoryInterface = createRepositoryInterfaceString({domainNameClass, domainNameVariable, relativePathInterfaceToEntity})
+    fs.writeFileSync(path.join(filePath, `${this.repositoryFileNameWithExtension(domainNameKebab)}`), repositoryInterface)
   }
 
   private createUsecase(domainNameOriginal: string) {
@@ -77,23 +74,6 @@ class Dddgen extends Command {
     const dtoFilePath = this.createAppDTODirectory(domainNameKebab)
     const dtoClassString = createDTOClassString({domainNameClass, domainNameVariable, relativePathDTOToEntity: relativePathAppToEntity})
     fs.writeFileSync(path.join(dtoFilePath, `${this.dtoFileNameWithExtension(domainNameKebab)}`), dtoClassString)
-  }
-
-  private createRepository(domainNameOriginal: string) {
-    const {domainNameClass, domainNameVariable, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
-    const relativePathInterfaceToEntity = `../${entity}/${domainNameKebab}` // fixme: ベタがきじゃなくて、ちゃんと相対パスを取得するメソッドを用意する
-
-    const filePath = this.createRepositoryDirectory(domainNameKebab)
-    const repositoryInterface = createRepositoryInterfaceString({domainNameClass, domainNameVariable, relativePathInterfaceToEntity})
-    fs.writeFileSync(path.join(filePath, `${this.repositoryFileNameWithExtension(domainNameKebab)}`), repositoryInterface)
-  }
-
-  private createEntity(domainNameOriginal: string) {
-    const {domainNameClass, domainNameKebab} = getDomainNamePatterns(domainNameOriginal)
-
-    const filePath = this.createEntityDirectory(domainNameKebab)
-    const entityClassString = createEntityClassString(domainNameClass)
-    fs.writeFileSync(path.join(filePath, this.entityFileNameWithExtension(domainNameKebab)), entityClassString)
   }
 
   private createUsecaseDirectory(domainName: string) {
@@ -138,6 +118,26 @@ class Dddgen extends Command {
         fs.mkdirSync(currentPath)
       }
     })
+  }
+
+  private repositoryFileName = (domainNameKebab: string) => {
+    return `${domainNameKebab}-repository`
+  }
+
+  private dtoFileName = (domainNameKebab: string) => {
+    return `${domainNameKebab}-dto`
+  }
+
+  private entityFileNameWithExtension = (domainNameKebab: string) => {
+    return `${domainNameKebab}${fileExtention}`
+  }
+
+  private dtoFileNameWithExtension = (domainNameKebab: string) => {
+    return `${this.dtoFileName(domainNameKebab)}${fileExtention}`
+  }
+
+  private repositoryFileNameWithExtension = (domainNameKebab: string) => {
+    return `${this.repositoryFileName(domainNameKebab)}${fileExtention}`
   }
 }
 
