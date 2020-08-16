@@ -1,11 +1,11 @@
 {
   "name": "dddgen",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Dowanna",
   "bin": {
     "dddgen": "./bin/run"
   },
-  "bugs": "https://github.com/Dowanna/dddgen/issues",
+  "bugs": "https://github.com/dowanna/ddd-generate/issues",
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
@@ -34,7 +34,7 @@
     "/bin",
     "/lib"
   ],
-  "homepage": "https://github.com/Dowanna/dddgen",
+  "homepage": "https://github.com/dowanna/ddd-generate",
   "keywords": [
     "dddgen, ddd, boilerplate"
   ],
