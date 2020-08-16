@@ -6,23 +6,17 @@ import {getDomainNamePatterns} from './util/path'
 import {srcDir, usecase, repository, entity, domain, dto, app, fileExtention} from './constants/path'
 
 class Dddgen extends Command {
-  static description = 'describe the command here'
+  static description = 'App/domain layer boilerplate generator for DDD / onion architecture'
 
   static flags = {
-    // add --version flag to show CLI version
-    version: flags.version({char: 'v'}),
     help: flags.help({char: 'h'}),
-    // flag with a value (-n, --name=VALUE)
-    name: flags.string({char: 'n', description: 'name to print'}),
-    // flag with no value (-f, --force)
-    force: flags.boolean({char: 'f'}),
   }
 
   static args = [{name: 'entity'}]
 
   async run() {
-    const {args, flags} = this.parse(Dddgen)
-    const name = flags.name || args.entity || 'blank'
+    const {args} = this.parse(Dddgen)
+    const name = args.entity || 'testEntity'
     this.createEntity(name)
     this.createRepository(name)
     this.createUsecase(name)

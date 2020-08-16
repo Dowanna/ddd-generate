@@ -1,7 +1,7 @@
 {
   "name": "dddgen",
   "version": "0.0.0",
-  "author": "shunya matsubara @Dowanna",
+  "author": "Dowanna",
   "bin": {
     "dddgen": "./bin/run"
   },
@@ -36,7 +36,7 @@
   ],
   "homepage": "https://github.com/Dowanna/dddgen",
   "keywords": [
-    "oclif"
+    "dddgen, ddd, boilerplate"
   ],
   "license": "MIT",
   "main": "lib/index.js",
