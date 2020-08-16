@@ -3,6 +3,8 @@ const dto = 'DTO'
 const usecase = 'Usecase'
 const index = 'index'
 const Index = 'Index'
+const find = 'find'
+const Find = 'Find'
 
 export const createEntityClassString = (entityName: string) => {
   return `
@@ -26,7 +28,7 @@ export const createRepositoryInterfaceString = (params: {domainNameClass: string
 
   export interface ${entityClassName}${repository} {
     ${index}(): Promise<${entityClassName}[]>;
-    find(id: string): Promise<${entityClassName}>;
+    ${find}(id: string): Promise<${entityClassName}>;
     delete(id: string): Promise<void>;
     update(${entityVariableName}: ${entityClassName}): Promise<${entityClassName}>;
   }
@@ -65,6 +67,30 @@ export const createIndexUsecaseString = (params: {domainNameClass: string; domai
       return ${domainNameVariable}List.map((${domainNameVariable}: ${domainNameClass}) => {
         return new ${domainNameClass}${dto}(${domainNameVariable})
       })
+    }
+  }
+  `
+}
+
+export const createFindUsecaseString = (params: {domainNameClass: string; domainNameVariable: string; relativePathAppToRepo: string; relativePathAppToEntity: string; relativePathAppToDTO: string}): string => {
+  const {domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO} = params
+  return `
+  import { ${domainNameClass} } from '${relativePathAppToEntity}'
+  import { ${domainNameClass}${repository} } from '${relativePathAppToRepo}'
+  import { ${domainNameClass}${dto} } from '${relativePathAppToDTO}'
+
+  export class ${Find}${domainNameClass}${usecase} {
+    private readonly ${domainNameVariable}Repo: ${domainNameClass}${repository}
+
+    public constructor(${domainNameVariable}Repo: ${domainNameClass}${repository}) {
+      this.${domainNameVariable}Repo = ${domainNameVariable}Repo
+    }
+
+    public async do(id: string) {
+      const ${domainNameVariable}: ${domainNameClass} = await this.${domainNameVariable}Repo.${find}(id)
+      if (!${domainNameVariable}) return undefined
+
+      return new ${domainNameClass}${dto}(${domainNameVariable})
     }
   }
   `

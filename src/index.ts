@@ -1,7 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import * as fs from 'fs'
 import * as path from 'path'
-import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString} from './class-strings'
+import {createEntityClassString, createRepositoryInterfaceString, createIndexUsecaseString, createDTOClassString, createFindUsecaseString} from './class-strings'
 import {getDomainNamePatterns} from './util/path'
 import {srcDir, usecase, repository, entity, domain, dto, app} from './constants/path'
 
@@ -36,11 +36,13 @@ class Dddgen extends Command {
 
     const dtoClassString = createDTOClassString({domainNameClass, domainNameVariable, relativePathDTOToEntity: relativePathAppToEntity})
     const indexUsecaseClassString = createIndexUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
+    const findUsecaseClassString = createFindUsecaseString({domainNameClass, domainNameVariable, relativePathAppToRepo, relativePathAppToEntity, relativePathAppToDTO})
     const dtoFilePath = this.createAppDTODirectory(domainNameKebab)
     const indexUsecaseFilePath = this.createUsecaseDirectory(domainNameKebab)
 
     fs.writeFileSync(path.join(dtoFilePath, `${domainNameKebab}-dto.ts`), dtoClassString)
     fs.writeFileSync(path.join(indexUsecaseFilePath, `index-${domainNameKebab}-usecase.ts`), indexUsecaseClassString)
+    fs.writeFileSync(path.join(indexUsecaseFilePath, `find-${domainNameKebab}-usecase.ts`), findUsecaseClassString)
   }
 
   private createRepository(domainNameOriginal: string) {
